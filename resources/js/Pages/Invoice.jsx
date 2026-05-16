@@ -1,6 +1,19 @@
 import { Head } from '@inertiajs/react';
 
-export default function Invoice() {
+export default function Invoice({ data }) {
+    const invoiceId = data ? data.id.replace('#', '') : '10470';
+    const customerName = data ? data.name : 'Cash';
+    const dateStr = data ? data.date : 'December 10, 2026';
+    const terms = data && data.terms ? data.terms : 'Cash';
+    const items = data && data.items ? data.items : [
+        { code: 'MWVV3AM/A', description: '20W USB-C Power Adapter(2024)', unitCost: 1290, qty: 1 },
+        { code: 'PMC0001SML', description: 'Paper Bag Small', unitCost: 0, qty: 1 }
+    ];
+
+    const totalAmount = items.reduce((sum, item) => sum + (Number(item.unitCost) * Number(item.qty)), 0);
+    const vatableSales = totalAmount / 1.12;
+    const vat = totalAmount - vatableSales;
+
     return (
         <div className="min-h-screen bg-gray-100 py-10 print:py-0 print:bg-white flex justify-center">
             <Head title="Sales Invoice" />
@@ -35,11 +48,11 @@ export default function Invoice() {
                         <h1 className="font-serif font-bold text-2xl tracking-widest mb-1">SALES INVOICE</h1>
                         <div className="flex justify-end items-center gap-2 mb-2">
                             <span className="font-serif font-bold text-lg">No.</span>
-                            <span className="font-serif text-red-600 font-bold text-xl">10470</span>
+                            <span className="font-serif text-red-600 font-bold text-xl">{invoiceId}</span>
                         </div>
                         <div className="flex justify-end items-baseline gap-1">
                             <span>DATE:</span>
-                            <span className="text-gray-500 underline decoration-gray-300 underline-offset-2">December 10, 2026</span>
+                            <span className="text-gray-500 underline decoration-gray-300 underline-offset-2">{dateStr}</span>
                         </div>
                     </div>
                 </div>
@@ -50,30 +63,31 @@ export default function Invoice() {
                     <div className="flex border-b border-black">
                         <div className="w-[30%] border-r border-black p-1 pb-4">
                             <div>Sold to:</div>
-                            <div className="text-gray-500 uppercase mt-1 px-4">Cash</div>
+                            <div className="text-gray-500 uppercase mt-1 px-4">{customerName}</div>
                         </div>
                         <div className="w-[35%] border-r border-black p-1 pb-4">
                             <div>Shipping Address:</div>
-                            <div className="text-gray-500 uppercase mt-1 px-4">Refused To Register In OA</div>
+                            <div className="text-gray-500 uppercase mt-1 px-4">{data && data.shippingAddress ? data.shippingAddress : 'Refused To Register In OA'}</div>
                         </div>
                         <div className="w-[15%] border-r border-black p-1">
                             <div>Contact:</div>
+                            <div className="text-gray-500 uppercase mt-1 px-2">{data && data.contact ? data.contact : '-'}</div>
                         </div>
                         <div className="w-[20%] p-1 relative">
-                            <div>PO:</div>
+                            <div>PO: <span className="text-gray-500">{data && data.poNumber ? data.poNumber : '-'}</span></div>
                             <div className="absolute bottom-1 left-1 text-[10px] text-gray-500 flex flex-col gap-0.5">
-                                <div>Cashier <span className="ml-2">: SMADRID</span></div>
-                                <div>Sales Person <span className="ml-1">: ANTORRES</span></div>
+                                <div>Cashier <span className="ml-2">: {data && data.cashier ? data.cashier : 'SMADRID'}</span></div>
+                                <div>Sales Person <span className="ml-1">: {data && data.salesPerson ? data.salesPerson : 'ANTORRES'}</span></div>
                             </div>
                         </div>
                     </div>
                     {/* Bottom Row */}
                     <div className="flex">
                         <div className="w-[30%] border-r border-black p-1">
-                            <div>TIN:</div>
+                            <div>TIN: <span className="text-gray-500 ml-2">{data && data.tin ? data.tin : '-'}</span></div>
                         </div>
                         <div className="flex-1 p-1">
-                            <div>Terms:</div>
+                            <div>Terms: <span className="text-gray-500 uppercase ml-2">{terms}</span></div>
                         </div>
                     </div>
                 </div>
@@ -91,24 +105,17 @@ export default function Invoice() {
 
                     {/* Table Body (Items) */}
                     <div className="flex-1">
-                        {/* Item 1 */}
-                        <div className="flex px-1 py-4 text-gray-500 uppercase font-medium tracking-wider">
-                            <div className="w-[20%] pl-2">MWVV3AM/A</div>
-                            <div className="flex-1 pr-4">
-                                <div>20W USB-C Power Adapter(2024)</div>
+                        {items.map((item, index) => (
+                            <div key={index} className="flex px-1 py-4 text-gray-500 uppercase font-medium tracking-wider">
+                                <div className="w-[20%] pl-2 truncate">{item.code || '-'}</div>
+                                <div className="flex-1 pr-4 truncate">
+                                    <div>{item.description || '-'}</div>
+                                </div>
+                                <div className="w-[15%] text-right pr-4">{Number(item.unitCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                <div className="w-[8%] text-center">{item.qty}</div>
+                                <div className="w-[18%] text-right pr-6">{(Number(item.unitCost) * Number(item.qty)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                             </div>
-                            <div className="w-[15%] text-right pr-4">1,290.00</div>
-                            <div className="w-[8%] text-center">1</div>
-                            <div className="w-[18%] text-right pr-6">1,290.00</div>
-                        </div>
-                        {/* Item 3 */}
-                        <div className="flex px-1 py-1 text-gray-500 uppercase font-medium tracking-wider">
-                            <div className="w-[20%] pl-2">PMC0001SML</div>
-                            <div className="flex-1">Paper Bag Small</div>
-                            <div className="w-[15%] text-right pr-4">0.00</div>
-                            <div className="w-[8%] text-center">1</div>
-                            <div className="w-[18%] text-right pr-6">0.00</div>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
@@ -185,12 +192,12 @@ export default function Invoice() {
                         </div>
                         {/* Values Column */}
                         <div className="w-[20%] text-right text-gray-500 space-y-1 relative">
-                            <div className="pt-1">1,151.79</div>
+                            <div className="pt-1">{vatableSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                             <div className="pt-3">0.00</div>
                             <div className="pt-1">0.00</div>
-                            <div className="pt-3">138.21</div>
-                            <div className="pt-2">710.00</div>
-                            <div className="pt-4">1,290.00</div>
+                            <div className="pt-3">{vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            <div className="pt-2">0.00</div>
+                            <div className="pt-4">{totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         </div>
                     </div>
                 </div>
